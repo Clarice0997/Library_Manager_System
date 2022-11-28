@@ -7,15 +7,13 @@
         </keep-alive>
       </div>
       <div class="con-box left">
-        <h2 class="title">欢迎来到<span>宠物之家</span></h2>
-        <p>快来领取你的专属<span>宠物</span>吧</p>
+        <h2 class="title"><span>图书馆管理系统</span></h2>
         <img src="@/assets/img/login.svg" class="smaller" />
         <p>已有账号</p>
         <router-link id="login" to="/login/login">去登录</router-link>
       </div>
       <div class="con-box right">
-        <h2 class="title">欢迎来到<span>宠物之家</span></h2>
-        <p>快来看看你的可爱<span>宠物</span>吧</p>
+        <h2 class="title"><span>图书馆管理系统</span></h2>
         <img src="@/assets/img/register.svg" class="smaller" />
         <p>没有账号？</p>
         <router-link id="register" to="/login/register">去注册</router-link>
