@@ -12,7 +12,7 @@
         <el-input v-model="form.repassword" show-password maxlength="18" minlength="6" prefix-icon="el-icon-lock"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click.native="clickRegisterBtn" v-loading.fullscreen="fullscreenLoading">注册</el-button>
+        <el-button type="primary" @click.native="clickRegisterBtn" v-loading.fullscreen="fullscreenLoading" :loading="btnLoading">注册</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -89,7 +89,9 @@ export default {
         ]
       },
       // Loading显隐
-      fullscreenLoading: false
+      fullscreenLoading: false,
+      // 按钮加载状态
+      btnLoading: false
     }
   },
 
@@ -97,46 +99,65 @@ export default {
 
   methods: {
     clickRegisterBtn() {
-      console.log(md5(123))
       // 校验表单
       this.$refs.form.validate(async valid => {
         if (valid) {
           // Loading遮罩
           this.fullscreenLoading = true
-          const { data: res } = await registerAPI(this.form.username, this.form.password)
-          // 返回值200 跳转登录组件
-          if (res.code === 200) {
-            this.fullscreenLoading = false
-            // 重置表单数据
-            this.form = this.$options.data().form
-            // 成功注册弹窗
-            this.$message({
-              message: res.data,
-              type: 'success',
-              duration: 2000
+          // 加载按钮
+          this.btnLoading = true
+          // const { data: res } = await registerAPI(this.form.username, this.form.password)
+          // 采用上述解构赋值 无法使用catch进行错误处理
+          await registerAPI(this.form.username, this.form.password)
+            .then(res => {
+              console.log(res)
+              // 返回值200 跳转登录组件
+              if (res.data.code === 200) {
+                this.fullscreenLoading = false
+                // 重置表单数据
+                this.form = this.$options.data().form
+                // 成功注册弹窗
+                this.$message({
+                  message: res.data.message,
+                  type: 'success',
+                  duration: 2000
+                })
+                this.$router.replace('/login')
+                // 返回值409 账号已存在
+              } else if (res.data.code === 409) {
+                this.fullscreenLoading = false
+                // 账号已存在弹窗
+                this.$message({
+                  message: res.data.message,
+                  type: 'error',
+                  duration: 2000
+                })
+                // 重置表单数据
+                this.form = this.$options.data().form
+              } else {
+                this.fullscreenLoading = false
+                this.$message({
+                  message: res.data.message,
+                  type: 'error',
+                  duration: 2000
+                })
+                // 重置表单数据
+                this.form = this.$options.data().form
+              }
             })
-            this.$router.replace('/login')
-            // 返回值409 账号已存在
-          } else if (res.code === 409) {
-            this.fullscreenLoading = false
-            // 账号已存在弹窗
-            this.$message({
-              message: res.data,
-              type: 'error',
-              duration: 2000
+            .catch(err => {
+              this.$message({
+                message: err,
+                type: 'error',
+                duration: 2000
+              })
+              this.fullscreenLoading = false
+              return
             })
-            // 重置表单数据
-            this.form = this.$options.data().form
-          } else {
-            this.fullscreenLoading = false
-            this.$message({
-              message: res.data,
-              type: 'error',
-              duration: 2000
+            .finally(() => {
+              // 停止加载按钮
+              this.btnLoading = false
             })
-            // 重置表单数据
-            this.form = this.$options.data().form
-          }
         } else {
           return false
         }

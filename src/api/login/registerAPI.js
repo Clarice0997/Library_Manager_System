@@ -2,11 +2,11 @@
 import request from '@/utils/request.js'
 
 // 封装注册API
-export const registerAPI = function (_account, _password) {
-  return request.get('apis/register', {
-    params: {
-      _account,
-      _password
+export const registerAPI = function (username, password) {
+  return request.post('apis/register', {
+    data: {
+      username,
+      password
     }
   })
 }

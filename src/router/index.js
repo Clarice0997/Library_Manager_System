@@ -1,9 +1,17 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-// 导入处理Cookie模块
-import VueCookies from 'vue-cookies'
+// 导入获取token函数
+import { getToken } from '@/utils/auth'
 
+// 配置路由跳转
+const routerPush = VueRouter.prototype.push
+
+VueRouter.prototype.push = function (location) {
+  return routerPush.call(this, location).catch(err => {})
+}
+
+// 使用路由模块
 Vue.use(VueRouter)
 
 const routes = [
@@ -67,11 +75,11 @@ const router = new VueRouter({
 })
 
 // 全局路由前置守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   // 判断当前访问网址是不是路由守卫网址
   // 是则校验cookie 否则放行
   if (to.matched.some(record => record.meta.requireAuth)) {
-    if (VueCookies.get('loginCookie')) {
+    if (await getToken()) {
       next()
     } else {
       next('/login')

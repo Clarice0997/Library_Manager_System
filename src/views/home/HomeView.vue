@@ -77,8 +77,8 @@
 </template>
 
 <script>
-// 导入处理Cookie模块
-import VueCookies from 'vue-cookies'
+// 导入删除Token函数
+import { deleteToken } from '@/utils/auth'
 
 export default {
   name: 'LibraryManagerSystemHomeView',
@@ -102,8 +102,8 @@ export default {
   methods: {
     logout(value) {
       if (value == 'logout') {
-        // 删除登录token
-        VueCookies.remove('loginCookie')
+        // 删除校验token
+        deleteToken()
         // 刷新页面
         location.reload()
       }

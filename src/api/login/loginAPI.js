@@ -2,11 +2,11 @@
 import request from '@/utils/request.js'
 
 // 封装登录API
-export const loginAPI = function (_account, _password) {
-  return request.get('apis/login', {
-    params: {
-      _account,
-      _password
+export const loginAPI = function (username, password) {
+  return request.post('apis/login', {
+    data: {
+      username,
+      password
     }
   })
 }

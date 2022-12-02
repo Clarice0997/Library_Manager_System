@@ -9,7 +9,7 @@
         <el-input v-model="form.password" show-password prefix-icon="el-icon-lock"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="clickLoginBtn" v-loading.fullscreen="fullscreenLoading">登录</el-button>
+        <el-button type="primary" @click="clickLoginBtn" v-loading.fullscreen="fullscreenLoading" :loading="btnLoading">登录</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -19,6 +19,7 @@
 // 导入
 import { loginAPI } from '@/api/login/loginAPI.js'
 import router from '@/router'
+import { setToken } from '@/utils/auth'
 
 export default {
   name: 'LibraryManagerSystemLogin',
@@ -64,7 +65,9 @@ export default {
         ]
       },
       // Loading显隐
-      fullscreenLoading: false
+      fullscreenLoading: false,
+      // 按钮加载状态
+      btnLoading: false
     }
   },
 
@@ -78,23 +81,38 @@ export default {
         if (valid) {
           // Loading遮罩
           this.fullscreenLoading = true
+          // 加载按钮
+          this.btnLoading = true
           // 异步请求 解构网络请求返回值
           // const { data } = await loginAPI(this.form.username, this.form.password)
+          // 采用上述解构赋值 无法使用catch进行错误处理
           await loginAPI(this.form.username, this.form.password)
             .then(res => {
               console.log(res)
-              if (res.data.code === 200) {
+              // 判断状态码是否正常
+              if (res.data.data.code === 200) {
+                // 遮罩消失
                 this.fullscreenLoading = false
+                // 保存token值
+                setToken(res.data.token)
+                // 登录成功消息
+                this.$message({
+                  message: res.data.data.message,
+                  type: 'success',
+                  duration: 2000
+                })
                 // 路由跳转首页
                 router.replace('/home')
-              } else if (res.data.code >= 400 && res.data.code <= 500) {
+              } else if (res.data.data.code >= 400 && res.data.data.code <= 500) {
                 this.fullscreenLoading = false
+                // 登录失败消息
                 this.$message({
-                  message: res.data.data,
+                  message: res.data.data.message,
                   type: 'error',
                   duration: 2000
                 })
-              } else if (res.data.code) {
+              } else if (res.data.data.code) {
+                // 位置错误
                 console.log(res.data)
               } else {
                 console.log(err)
@@ -108,6 +126,10 @@ export default {
               })
               this.fullscreenLoading = false
               return
+            })
+            .finally(() => {
+              // 停止加载按钮
+              this.btnLoading = false
             })
         } else {
           return false
