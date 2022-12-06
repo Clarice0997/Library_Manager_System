@@ -46,10 +46,12 @@
     <div class="right-container">
       <div class="right-header">
         <!-- 面包屑 -->
-        <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb separator-class="el-icon-arrow-right" v-if="isShowBreadcrumb">
           <!-- 动态面包屑 -->
           <el-breadcrumb-item :to="item.path && { path: item.path }" v-for="item in menuPath" :key="item.path">{{ item.name }}</el-breadcrumb-item>
         </el-breadcrumb>
+        <!-- 占位 -->
+        <div v-else style="display: block"></div>
         <!-- 头部右侧个人信息 -->
         <!-- element下拉菜单 触发el-dropdown-link -->
         <!-- @command点击下拉菜单事件 -->
@@ -132,6 +134,12 @@ export default {
       },
       // 首次加载触发
       immediate: true
+    }
+  },
+  computed: {
+    // 是否显示面包屑 首页不显示
+    isShowBreadcrumb() {
+      return this.$route.path == '/main/home' ? false : true
     }
   }
 }
