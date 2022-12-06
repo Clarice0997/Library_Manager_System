@@ -179,8 +179,12 @@ export default {
 .left-sidebar {
   height: calc(100% - 50px);
   background: #545c64;
+  // 清除侧边栏右边框
+  .el-menu {
+    border-right: 0;
+  }
   .el-menu-item {
-    padding-left: 40px !important;
+    padding-left: 30px !important;
   }
 }
 .right-container {
@@ -192,7 +196,7 @@ export default {
 }
 .right-header {
   height: 50px;
-  background: wheat;
+  background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   border-bottom: 1px solid #eee;
   display: flex;
   align-items: center;
@@ -215,5 +219,6 @@ export default {
 }
 .right-body {
   height: calc(100% - 50px);
+  min-width: 1200px;
 }
 </style>
