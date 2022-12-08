@@ -74,19 +74,4 @@ const router = new VueRouter({
   routes
 })
 
-// 全局路由前置守卫
-router.beforeEach(async (to, from, next) => {
-  // 判断当前访问网址是不是路由守卫网址
-  // 是则校验cookie 否则放行
-  if (to.matched.some(record => record.meta.requireAuth)) {
-    if (await getToken()) {
-      next()
-    } else {
-      next('/login')
-    }
-  } else {
-    next()
-  }
-})
-
 export default router

@@ -17,7 +17,7 @@
 
 <script>
 // 导入
-import { loginAPI } from '@/api/login/loginAPI.js'
+import { loginAPI } from '@/api/userAPI'
 import router from '@/router'
 import { setToken } from '@/utils/auth'
 

@@ -5,6 +5,9 @@
       <el-form-item label="账号" prop="username">
         <el-input v-model="form.username" clearable maxlength="12" minlength="6" prefix-icon="el-icon-user"></el-input>
       </el-form-item>
+      <el-form-item label="昵称" prop="nickname">
+        <el-input v-model="form.nickname" clearable maxlength="12" minlength="6" prefix-icon="el-icon-user"></el-input>
+      </el-form-item>
       <el-form-item label="密码" prop="password">
         <el-input v-model="form.password" show-password maxlength="18" minlength="6" prefix-icon="el-icon-lock"></el-input>
       </el-form-item>
@@ -20,8 +23,7 @@
 
 <script>
 // 导入
-import { registerAPI } from '@/api/login/registerAPI'
-import md5 from 'md5'
+import { registerAPI } from '@/api/userAPI'
 
 export default {
   name: 'LibraryManagerSystemRegister',
@@ -40,6 +42,7 @@ export default {
     return {
       form: {
         username: '',
+        nickname: '',
         password: '',
         repassword: ''
       },
@@ -49,6 +52,21 @@ export default {
           {
             required: true,
             message: '请输入账号',
+            trigger: 'blur'
+          },
+          // 长度校验
+          {
+            min: 5,
+            max: 16,
+            message: '长度在5-16字符之间',
+            trigger: 'blur'
+          }
+        ],
+        nickname: [
+          // 必填项校验
+          {
+            required: true,
+            message: '请输入昵称',
             trigger: 'blur'
           },
           // 长度校验
@@ -108,27 +126,26 @@ export default {
           this.btnLoading = true
           // const { data: res } = await registerAPI(this.form.username, this.form.password)
           // 采用上述解构赋值 无法使用catch进行错误处理
-          await registerAPI(this.form.username, this.form.password)
+          await registerAPI(this.form.username, this.form.password, this.form.nickname)
             .then(res => {
-              console.log(res)
               // 返回值200 跳转登录组件
-              if (res.data.code === 200) {
+              if (res.data.result.code === 200) {
                 this.fullscreenLoading = false
                 // 重置表单数据
                 this.form = this.$options.data().form
                 // 成功注册弹窗
                 this.$message({
-                  message: res.data.message,
+                  message: res.data.result.message,
                   type: 'success',
                   duration: 2000
                 })
                 this.$router.replace('/login')
                 // 返回值409 账号已存在
-              } else if (res.data.code === 409) {
+              } else if (res.data.result.code === 409) {
                 this.fullscreenLoading = false
                 // 账号已存在弹窗
                 this.$message({
-                  message: res.data.message,
+                  message: res.data.result.message,
                   type: 'error',
                   duration: 2000
                 })
@@ -137,7 +154,7 @@ export default {
               } else {
                 this.fullscreenLoading = false
                 this.$message({
-                  message: res.data.message,
+                  message: res.data.result.message,
                   type: 'error',
                   duration: 2000
                 })
@@ -147,7 +164,7 @@ export default {
             })
             .catch(err => {
               this.$message({
-                message: err,
+                message: err.message,
                 type: 'error',
                 duration: 2000
               })
