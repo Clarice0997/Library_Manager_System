@@ -5,26 +5,26 @@
     <el-card shadow="hover" class="top-card">
       <!-- 学号&姓名 输入框 -->
       <span>学号：</span>
-      <el-input placeholder="请输入学号（精准匹配）" class="sid-input" prefix-icon="el-icon-search" v-model="sid"></el-input>
+      <el-input placeholder="请输入学号（精准匹配）" class="sid-input" prefix-icon="el-icon-search" v-model="sid" @keydown.native.13="searchHandler"></el-input>
       <span>姓名：</span>
-      <el-input placeholder="请输入姓名（模糊匹配）" class="sname-input" prefix-icon="el-icon-search" v-model="sname"></el-input>
+      <el-input placeholder="请输入姓名（模糊匹配）" class="sname-input" prefix-icon="el-icon-search" v-model="sname" @keydown.native.13="searchHandler"></el-input>
       <!-- 按钮区 -->
-      <el-button type="primary" icon="el-icon-search">查找</el-button>
+      <el-button type="primary" icon="el-icon-search" @click="searchHandler">查找</el-button>
       <el-button type="success" icon="el-icon-plus">新增</el-button>
       <el-button type="danger" icon="el-icon-delete">批量删除</el-button>
     </el-card>
     <!-- 主体表格区卡片 -->
     <el-card shadow="hover" class="body-card">
       <!-- element表格 用户表格 -->
-      <el-table ref="userManagerTable" :data="userData" tooltip-effect="dark" class="userManagerTable" @selection-change="handleSelectionChange" height="400">
+      <el-table ref="userManagerTable" :data="userData" tooltip-effect="dark" class="userManagerTable" @selection-change="handleSelectionChange" :row-class-name="tableRowClassName" height="500" max-height="700" :default-sort="{ prop: 'id', order: 'ascending' }">
         <!-- 选择列 -->
         <el-table-column type="selection" width="55"></el-table-column>
         <!-- 学号列 -->
-        <el-table-column label="学号" width="80" prop="id"> </el-table-column>
+        <el-table-column label="学号" width="80" prop="id" sortable> </el-table-column>
         <!-- 姓名列 -->
         <el-table-column prop="name" label="姓名" width="120"> </el-table-column>
         <!-- 状态列 -->
-        <el-table-column prop="audited" label="状态" width="120">
+        <el-table-column prop="audited" label="状态" width="120" sortable>
           <template slot-scope="scope">
             <!-- 标签 -->
             <!-- 判断当前用户状态 -->
@@ -33,10 +33,10 @@
           </template>
         </el-table-column>
         <!-- 学院列 -->
-        <el-table-column label="学院" width="180">
+        <el-table-column label="学院" width="180" sortable>
           <template slot-scope="scope">
             <!-- 弹框标签 -->
-            <el-popover trigger="hover" placement="top">
+            <el-popover trigger="hover" placement="top" v-if="scope.row.college">
               <p>专业: {{ scope.row.major }}</p>
               <div slot="reference" class="name-wrapper">
                 <el-tag size="medium" type="success">{{ scope.row.college }}</el-tag>
@@ -62,11 +62,18 @@
           </template>
         </el-table-column>
       </el-table>
+      <!-- 分页栏 -->
+      <div class="block">
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="pageNumber" :page-sizes="[5, 10, 15, 20]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="totalData"> </el-pagination>
+      </div>
     </el-card>
   </div>
 </template>
 
 <script>
+// import
+import dateformat from 'dateformat-util'
+
 export default {
   name: 'userManager',
 
@@ -74,6 +81,8 @@ export default {
     return {
       sid: '',
       sname: '',
+      pageNumber: 1,
+      pageSize: 20,
       // 用户数据源
       userData: [
         {
@@ -127,12 +136,33 @@ export default {
     }
   },
 
+  computed: {
+    // 计算数据条数
+    totalData() {
+      return this.userData.length
+    }
+  },
+
   mounted() {},
 
   methods: {
+    // 搜索按钮点击事件
+    searchHandler() {
+      this.$message({
+        message: '搜索中...',
+        type: 'info'
+      })
+    },
     // 选择列数据事件
     handleSelectionChange(val) {
       this.multipleSelection = val
+    },
+    // 判断行状态函数
+    tableRowClassName({ row, rowIndex }) {
+      if (!row.audited) {
+        return 'warning-row'
+      }
+      return ''
     },
     // 授权按钮点击事件
     handleAuthorize(index, row) {},
@@ -141,7 +171,15 @@ export default {
     // 重置密码按钮点击事件
     handleReset(index, row) {},
     // 审核按钮点击事件
-    handleAudited(index, row) {}
+    handleAudited(index, row) {},
+    // 页面显示条数改变事件
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`)
+    },
+    // 页码改变事件
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`)
+    }
   }
 }
 </script>
@@ -168,5 +206,8 @@ export default {
       margin-right: 5px;
     }
   }
+}
+.block {
+  margin-top: 10px;
 }
 </style>

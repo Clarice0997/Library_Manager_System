@@ -1,7 +1,12 @@
 // 导入封装axios对象
 import request from '@/utils/request.js'
 
-// 封装登录API
+/**
+ * 登录API
+ * @param {*} username
+ * @param {*} password
+ * @returns
+ */
 export const loginAPI = function (username, password) {
   return request.post('apis/user/login', {
     data: {
@@ -11,7 +16,13 @@ export const loginAPI = function (username, password) {
   })
 }
 
-// 封装注册API
+/**
+ * 注册API
+ * @param {*} username
+ * @param {*} password
+ * @param {*} nickname
+ * @returns
+ */
 export const registerAPI = function (username, password, nickname) {
   return request.post('apis/user/register', {
     data: {
@@ -22,7 +33,10 @@ export const registerAPI = function (username, password, nickname) {
   })
 }
 
-// 封装获取信息API
+/**
+ * 获取个人信息API
+ * @returns
+ */
 export const userProfileAPI = function () {
   return request.get('apis/user/profile')
 }
