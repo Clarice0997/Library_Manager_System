@@ -72,7 +72,7 @@
 
 <script>
 // import
-import dateformat from 'dateformat-util'
+import { getUsersInfo } from '@/api/userManagerAPI'
 
 export default {
   name: 'userManager',
@@ -142,7 +142,12 @@ export default {
       return this.userData.length
     }
   },
-
+  // Vue实例创建时发起网络请求
+  created() {
+    // 获取用户信息
+    this.getUsersInfoHandler()
+    console.log(new Date('2022-12-10T15:52:55.000Z'))
+  },
   mounted() {},
 
   methods: {
@@ -179,6 +184,16 @@ export default {
     // 页码改变事件
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`)
+    },
+    // 发起网络请求获取用户数据函数
+    getUsersInfoHandler() {
+      getUsersInfo(this.pageNumber, this.pageSize)
+        .then(res => {
+          console.log(res)
+        })
+        .catch(err => {
+          console.log(err)
+        })
     }
   }
 }
