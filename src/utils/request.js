@@ -23,6 +23,8 @@ const request = axios.create({
 request.interceptors.request.use(config => {
   // 开启进度条
   NProgress.start()
+  // 请求拦截添加校验码
+  config.headers.Authorization = getToken()
   return config
 })
 
