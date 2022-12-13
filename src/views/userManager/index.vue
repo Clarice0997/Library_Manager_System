@@ -22,13 +22,13 @@
         <!-- 学号列 -->
         <el-table-column label="学号" width="80" prop="id" sortable> </el-table-column>
         <!-- 姓名列 -->
-        <el-table-column prop="name" label="姓名" width="120"> </el-table-column>
+        <el-table-column prop="nickname" label="姓名" width="120"> </el-table-column>
         <!-- 状态列 -->
         <el-table-column prop="audited" label="状态" width="120" sortable>
           <template slot-scope="scope">
             <!-- 标签 -->
             <!-- 判断当前用户状态 -->
-            <el-tag size="medium" v-if="scope.row.audited">正常</el-tag>
+            <el-tag size="medium" v-if="scope.row.audited == '1'">正常</el-tag>
             <el-tag size="warning" v-else>待审核</el-tag>
           </template>
         </el-table-column>
@@ -42,6 +42,7 @@
                 <el-tag size="medium" type="success">{{ scope.row.college }}</el-tag>
               </div>
             </el-popover>
+            <el-tag size="medium" type="warning" v-else>未选择学院</el-tag>
           </template>
         </el-table-column>
         <!-- 入网时间列 -->
@@ -49,7 +50,7 @@
           <!-- 自定义列模板 -->
           <template slot-scope="scope">
             <i class="el-icon-time" style="margin-right: 10px"></i>
-            <span>{{ scope.row.createTime }}</span>
+            <span>{{ scope.row.create_time }}</span>
           </template>
         </el-table-column>
         <!-- 操作列  -->
@@ -58,9 +59,15 @@
             <el-button type="danger" size="mini" @click="handleAuthorize(scope.$index, scope.row)">授权</el-button>
             <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
             <el-button type="warning" size="mini" @click="handleReset(scope.$index, scope.row)">重置密码</el-button>
-            <el-button type="success" size="mini" v-if="!scope.row.audited" @click="handleAudited(scope.$index, scope.row)">审核</el-button>
+            <el-button type="success" size="mini" v-if="scope.row.audited != '1'" @click="handleAudited(scope.$index, scope.row)">审核</el-button>
           </template>
         </el-table-column>
+        <template slot="empty">
+          <div class="empty">
+            <img src="@/assets/img/empty.png" />
+            <span>暂无用户数据</span>
+          </div>
+        </template>
       </el-table>
       <!-- 分页栏 -->
       <div class="block">
@@ -85,51 +92,51 @@ export default {
       pageSize: 20,
       // 用户数据源
       userData: [
-        {
-          id: 111,
-          name: 'Clarice',
-          type: 1,
-          audited: true,
-          college: '计算与信息科学学院',
-          major: '软件工程',
-          createTime: '2022年12月06日 23时00分'
-        },
-        {
-          id: 222,
-          name: 'Clarice',
-          type: 1,
-          audited: false,
-          college: '计算与信息科学学院',
-          major: '软件工程',
-          createTime: '2022年12月06日 23时00分'
-        },
-        {
-          id: 333,
-          name: 'Clarice',
-          type: 1,
-          audited: false,
-          college: '计算与信息科学学院',
-          major: '软件工程',
-          createTime: '2022年12月06日 23时00分'
-        },
-        {
-          id: 444,
-          name: 'Clarice',
-          type: 1,
-          audited: true,
-          college: '计算与信息科学学院',
-          major: '软件工程',
-          createTime: '2022年12月06日 23时00分'
-        },
-        {
-          id: 555,
-          name: 'Clarice',
-          type: 1,
-          audited: true,
-          college: '计算与信息科学学院',
-          major: '软件工程',
-          createTime: '2022年12月06日 23时00分'
-        }
+        // {
+        //   id: 111,
+        //   nickname: 'Clarice',
+        //   type: 1,
+        //   audited: true,
+        //   college: '计算与信息科学学院',
+        //   major: '软件工程',
+        //   create_time: '2022年12月06日 23时00分'
+        // },
+        // {
+        //   id: 222,
+        //   nickname: 'Clarice',
+        //   type: 1,
+        //   audited: false,
+        //   college: '计算与信息科学学院',
+        //   major: '软件工程',
+        //   create_time: '2022年12月06日 23时00分'
+        // },
+        // {
+        //   id: 333,
+        //   nickname: 'Clarice',
+        //   type: 1,
+        //   audited: false,
+        //   college: '计算与信息科学学院',
+        //   major: '软件工程',
+        //   create_time: '2022年12月06日 23时00分'
+        // },
+        // {
+        //   id: 444,
+        //   nickname: 'Clarice',
+        //   type: 1,
+        //   audited: true,
+        //   college: '计算与信息科学学院',
+        //   major: '软件工程',
+        //   create_time: '2022年12月06日 23时00分'
+        // },
+        // {
+        //   id: 555,
+        //   nickname: 'Clarice',
+        //   type: 1,
+        //   audited: true,
+        //   college: '计算与信息科学学院',
+        //   major: '软件工程',
+        //   create_time: '2022年12月06日 23时00分'
+        // }
       ],
       // 选中列数组
       multipleSelection: []
@@ -146,7 +153,6 @@ export default {
   created() {
     // 获取用户信息
     this.getUsersInfoHandler()
-    console.log(new Date('2022-12-10T15:52:55.000Z'))
   },
   mounted() {},
 
@@ -188,11 +194,27 @@ export default {
     // 发起网络请求获取用户数据函数
     getUsersInfoHandler() {
       getUsersInfo(this.pageNumber, this.pageSize)
-        .then(res => {
-          console.log(res)
+        .then(({ data: { result } }) => {
+          console.log(result)
+          if (result.code == 200) {
+            this.$message({
+              message: '获取用户信息成功',
+              type: 'success'
+            })
+            this.userData = result.data
+          } else {
+            this.$message({
+              message: '获取用户信息失败',
+              type: 'error'
+            })
+          }
         })
         .catch(err => {
           console.log(err)
+          this.$message({
+            message: '获取用户信息失败',
+            type: 'error'
+          })
         })
     }
   }
@@ -219,6 +241,19 @@ export default {
     width: 100%;
     button {
       margin-right: 5px;
+    }
+  }
+  .empty {
+    // 元素上下居中
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    // 居中
+    margin: auto;
+    text-align: center;
+    width: 20%;
+    img {
+      width: 30%;
     }
   }
 }
