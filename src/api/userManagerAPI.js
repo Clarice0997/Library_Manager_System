@@ -8,3 +8,7 @@ import request from '@/utils/request.js'
 export const getUsersInfo = function (pageNumber, pageSize) {
   return request.get('apis/userManager/getInfo', { params: { pageNumber, pageSize } })
 }
+
+export const searchUser = function (uid, nickname, pageNumber, pageSize) {
+  return request.get('apis/userManager/searchUser', { params: { uid, nickname, pageNumber, pageSize } })
+}

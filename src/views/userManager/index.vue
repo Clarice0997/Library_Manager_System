@@ -79,7 +79,7 @@
 
 <script>
 // import
-import { getUsersInfo } from '@/api/userManagerAPI'
+import { getUsersInfo, searchUser } from '@/api/userManagerAPI'
 
 export default {
   name: 'userManager',
@@ -159,10 +159,38 @@ export default {
   methods: {
     // 搜索按钮点击事件
     searchHandler() {
+      // 搜索弹框
       this.$message({
         message: '搜索中...',
         type: 'info'
       })
+      // 搜索用户
+      searchUser(this.sid, this.sname, this.pageNumber, this.pageSize)
+        .then(({ data: { result } }) => {
+          // 判断是否存在该用户
+          console.log(result)
+          // 搜索不存在该用户情况
+          if (result.code == 412) {
+            // 清空数组
+            this.userData = []
+            // 警告弹框
+            this.$message({
+              message: result.message,
+              type: 'warning'
+            })
+          } else {
+            // 结果赋值
+            this.userData = result.data
+            // 成功弹框
+            this.$message({
+              message: '搜索成功',
+              type: 'success'
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
     },
     // 选择列数据事件
     handleSelectionChange(val) {
