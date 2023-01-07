@@ -9,6 +9,14 @@ export const getUsersInfo = function (pageNumber, pageSize) {
   return request.get('apis/userManager/getInfo', { params: { pageNumber, pageSize } })
 }
 
+/**
+ * 搜索用户信息API
+ * @param {*} uid
+ * @param {*} nickname
+ * @param {*} pageNumber
+ * @param {*} pageSize
+ * @returns
+ */
 export const searchUser = function (uid, nickname, pageNumber, pageSize) {
   return request.get('apis/userManager/searchUser', { params: { uid, nickname, pageNumber, pageSize } })
 }

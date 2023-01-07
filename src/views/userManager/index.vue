@@ -5,7 +5,7 @@
     <el-card shadow="hover" class="top-card">
       <!-- 学号&姓名 输入框 -->
       <span>学号：</span>
-      <el-input placeholder="请输入学号（精准匹配）" class="sid-input" prefix-icon="el-icon-search" v-model="sid" @keydown.native.13="searchHandler"></el-input>
+      <el-input placeholder="请输入学号（精准匹配）" class="sid-input" prefix-icon="el-icon-search" v-model="sid" type="number" oninput="if(value<0)value=0" @keydown.native.13="searchHandler"></el-input>
       <span>姓名：</span>
       <el-input placeholder="请输入姓名（模糊匹配）" class="sname-input" prefix-icon="el-icon-search" v-model="sname" @keydown.native.13="searchHandler"></el-input>
       <!-- 按钮区 -->
@@ -16,7 +16,7 @@
     <!-- 主体表格区卡片 -->
     <el-card shadow="hover" class="body-card">
       <!-- element表格 用户表格 -->
-      <el-table ref="userManagerTable" :data="userData" tooltip-effect="dark" class="userManagerTable" @selection-change="handleSelectionChange" :row-class-name="tableRowClassName" height="500" max-height="700" :default-sort="{ prop: 'id', order: 'ascending' }">
+      <el-table ref="userManagerTable" :data="userData" tooltip-effect="dark" class="userManagerTable" @selection-change="handleSelectionChange" :row-class-name="tableRowClassName" height="700" max-height="900" :default-sort="{ prop: 'id', order: 'ascending' }">
         <!-- 选择列 -->
         <el-table-column type="selection" width="55"></el-table-column>
         <!-- 学号列 -->
@@ -90,46 +90,11 @@ export default {
       sname: '',
       pageNumber: 1,
       pageSize: 20,
+      totalData: 0,
       // 用户数据源
       userData: [
         // {
         //   id: 111,
-        //   nickname: 'Clarice',
-        //   type: 1,
-        //   audited: true,
-        //   college: '计算与信息科学学院',
-        //   major: '软件工程',
-        //   create_time: '2022年12月06日 23时00分'
-        // },
-        // {
-        //   id: 222,
-        //   nickname: 'Clarice',
-        //   type: 1,
-        //   audited: false,
-        //   college: '计算与信息科学学院',
-        //   major: '软件工程',
-        //   create_time: '2022年12月06日 23时00分'
-        // },
-        // {
-        //   id: 333,
-        //   nickname: 'Clarice',
-        //   type: 1,
-        //   audited: false,
-        //   college: '计算与信息科学学院',
-        //   major: '软件工程',
-        //   create_time: '2022年12月06日 23时00分'
-        // },
-        // {
-        //   id: 444,
-        //   nickname: 'Clarice',
-        //   type: 1,
-        //   audited: true,
-        //   college: '计算与信息科学学院',
-        //   major: '软件工程',
-        //   create_time: '2022年12月06日 23时00分'
-        // },
-        // {
-        //   id: 555,
         //   nickname: 'Clarice',
         //   type: 1,
         //   audited: true,
@@ -144,9 +109,9 @@ export default {
   },
 
   computed: {
-    // 计算数据条数
-    totalData() {
-      return this.userData.length
+    // 计算总页数
+    totalPage() {
+      return Math.ceil(this.totalData / this.pageSize)
     }
   },
   // Vue实例创建时发起网络请求
@@ -167,10 +132,11 @@ export default {
       // 搜索用户
       searchUser(this.sid, this.sname, this.pageNumber, this.pageSize)
         .then(({ data: { result } }) => {
-          // 判断是否存在该用户
           console.log(result)
           // 搜索不存在该用户情况
-          if (result.code == 412) {
+          if (result.code === 412) {
+            // 清空数据总条数
+            this.totalData = 0
             // 清空数组
             this.userData = []
             // 警告弹框
@@ -178,7 +144,11 @@ export default {
               message: result.message,
               type: 'warning'
             })
-          } else {
+          } else if (result.code === 200) {
+            // 数据总条数
+            this.totalData = result.count
+            // 重置数组
+            this.userData = []
             // 结果赋值
             this.userData = result.data
             // 成功弹框
@@ -190,11 +160,21 @@ export default {
         })
         .catch(err => {
           console.log(err)
+          // 清空数据总条数
+          this.totalData = 0
+          // 清空数组
+          this.userData = []
+          // 警告弹框
+          this.$message({
+            message: '搜索用户失败',
+            type: 'warning'
+          })
         })
     },
     // 选择列数据事件
     handleSelectionChange(val) {
       this.multipleSelection = val
+      console.log(this.multipleSelection)
     },
     // 判断行状态函数
     tableRowClassName({ row, rowIndex }) {
@@ -213,11 +193,17 @@ export default {
     handleAudited(index, row) {},
     // 页面显示条数改变事件
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+      // 赋值页面显示条数
+      this.pageSize = val
+      // 显示条数改变重新获取用户数据
+      this.getUsersInfoHandler()
     },
     // 页码改变事件
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+      // 页码改变
+      this.pageNumber = val
+      // 页码改变改变重新获取用户数据
+      this.getUsersInfoHandler()
     },
     // 发起网络请求获取用户数据函数
     getUsersInfoHandler() {
@@ -229,12 +215,20 @@ export default {
               message: '获取用户信息成功',
               type: 'success'
             })
+            // 重置数组
+            this.userData = []
+            // 赋值
             this.userData = result.data
+            this.totalData = result.count
           } else {
             this.$message({
               message: '获取用户信息失败',
               type: 'error'
             })
+            // 重置数组
+            this.userData = []
+            // 数据条数
+            this.totalData = 0
           }
         })
         .catch(err => {
@@ -243,6 +237,10 @@ export default {
             message: '获取用户信息失败',
             type: 'error'
           })
+          // 重置数组
+          this.userData = []
+          // 数据条数
+          this.totalData = 0
         })
     }
   }

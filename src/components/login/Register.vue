@@ -127,25 +127,28 @@ export default {
           // const { data: res } = await registerAPI(this.form.username, this.form.password)
           // 采用上述解构赋值 无法使用catch进行错误处理
           await registerAPI(this.form.username, this.form.password, this.form.nickname)
-            .then(res => {
+            .then(({ data }) => {
+              console.log(data)
               // 返回值200 跳转登录组件
-              if (res.data.result.code === 200) {
+              if (data.code === 200) {
                 this.fullscreenLoading = false
                 // 重置表单数据
                 this.form = this.$options.data().form
                 // 成功注册弹窗
                 this.$message({
-                  message: res.data.result.message,
+                  message: data.message,
                   type: 'success',
                   duration: 2000
                 })
+                // 重置表单数据
+                this.form = this.$options.data().form
                 this.$router.replace('/login')
                 // 返回值409 账号已存在
-              } else if (res.data.result.code === 409) {
+              } else if (data.code === 409) {
                 this.fullscreenLoading = false
                 // 账号已存在弹窗
                 this.$message({
-                  message: res.data.result.message,
+                  message: data.message,
                   type: 'error',
                   duration: 2000
                 })
@@ -154,7 +157,7 @@ export default {
               } else {
                 this.fullscreenLoading = false
                 this.$message({
-                  message: res.data.result.message,
+                  message: data.message,
                   type: 'error',
                   duration: 2000
                 })
